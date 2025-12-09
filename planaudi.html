@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Planificador de Auditorías</title>
+    <style>
+        :root {
+            --vino: #9e1a18;
+            --rojo: #e62330;
+            --bg: #f5f7f8;
+            --card: #ffffff;
+            --muted: #65707a;
+            --success: #1f8a4c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: #102027;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 28px;
+            background: linear-gradient(90deg, var(--vino), var(--rojo));
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .app-header .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .wrap {
+            max-width: 1150px;
+            margin: 22px auto;
+            padding: 18px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 20px rgba(16, 32, 39, 0.05);
+            margin-bottom: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .left {
+            min-height: 520px;
+        }
+
+        .right {
+            background: linear-gradient(180deg, #fff, #fcfcfc);
+            border-radius: 10px;
+            padding: 14px;
+            position: relative;
+            height: 100%;
+            min-height: 520px;
+        }
+
+        .preview-title {
+            color: var(--vino);
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .preview-block {
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #eef2f3;
+            margin-bottom: 10px;
+        }
+
+        .preview-row {
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #24323a;
+        }
+
+        .preview-day {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid var(--rojo);
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            color: var(--vino);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: 1px solid #d8e0e4;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .two-col {
+            display: flex;
+            gap: 12px;
+        }
+
+        .two-col>div {
+            flex: 1;
+        }
+
+        .three-col {
+            display: flex;
+            gap: 12px;
+        }
+
+        .three-col>div {
+            flex: 1;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: var(--vino);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: var(--rojo);
+        }
+
+        .btn.ghost {
+            background: transparent;
+            color: var(--vino);
+            border: 1px solid #f0d6d6;
+        }
+
+        .btn.secondary {
+            background: #6c6f72;
+        }
+
+        .btn.add-btn {
+            background: rgba(158, 26, 24, 0.1);
+            color: var(--vino);
+            font-size: 20px;
+            padding: 8px 14px;
+        }
+
+        .objetivos-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        @media (min-width: 900px) {
+            .objetivos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .objetivo-item {
+            padding: 10px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #edf1f2;
+        }
+
+        .horario-block {
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #e5e9ec;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .horario-block .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e63946;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #eef3f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: default;
+            padding: 8px;
+        }
+
+        .calendar-day.has-audit {
+            background: linear-gradient(135deg, #ffe5e5, #ffd4d4);
+            border-color: var(--rojo);
+            cursor: pointer;
+        }
+
+        .calendar-day .day-number {
+            font-weight: 700;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .calendar-day.has-audit .badge {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            background: var(--rojo);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .calendar-tooltip {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            background: var(--vino);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            min-width: 250px;
+            z-index: 100;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-day:hover .calendar-tooltip {
+            display: block;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--rojo);
+            padding-bottom: 10px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-body {
+            margin-top: 15px;
+        }
+
+        .checklist-item {
+            padding: 8px;
+            border-radius: 6px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            margin-bottom: 6px;
+        }
+
+        .checklist-item label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            font-weight: normal;
+            color: #333;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .small-muted {
+            font-size: 12px;
+            color: #7b8b91;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .risk-text {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .criterios-seleccionados {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border: 1px solid #d0e7ff;
+        }
+
+        .criterios-seleccionados strong {
+            color: var(--vino);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .criterio-tag {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin: 4px 4px 0 0;
+            font-size: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .panel-editar {
+            position: fixed;
+            right: -50%;
+            top: 0;
+            width: 50%;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .panel-editar.active {
+            right: 0;
+        }
+
+        .panel-editar-header {
+            background: linear-gradient(90deg, var(--vino), var(--rojo));
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-editar-body {
+            padding: 20px;
+        }
+
+        .overlay-editar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+        }
+
+        .overlay-editar.active {
+            display: block;
+        }
+
+        .ids-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .id-btn {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 2px solid var(--vino);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 700;
+            color: var(--vino);
+            transition: all 0.2s;
+        }
+
+        .id-btn:hover {
+            background: var(--vino);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .persona-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 6px 12px;
+            border-radius:15px;
+            margin: 4px;
+            font-size: 13px;
+            }
+            /* Nuevos estilos para buscador de IDs */
+    .search-ids {
+        margin-bottom: 15px;
+    }
+
+    .search-ids input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="logo">
+            <img src="https://i.imgur.com/SwwWUHO.png" alt="Logo Noel" style="height:90px;width:auto;display:block">
+        </div>
+        <div class="brand">Planificador de auditorías — SIG</div>
+        <div style="margin-left:auto;color:rgba(255,255,255,0.9);font-weight:600">Usuario: <span id="userEmail">Planeador de auditoría</span></div>
+    </div>
+    <div class="wrap">
+    <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:10px;align-items:center">
+                <button class="btn ghost" onclick="mostrarVistaPlanear()">Planear Auditoría</button>
+                <button class="btn ghost" onclick="abrirPanelEditar()">✏️ Editar Plan</button>
+                <button class="btn ghost" onclick="mostrarVistaCalendario()">📅 Calendario</button>
+            </div>
+            <div class="small-muted">Gestiona tus auditorías de forma completa</div>
+        </div>
+
+        <div id="vistaPlanear" class="hidden">
+            <div class="grid">
+                <div class="left">
+                    <div class="card">
+                        <label>Nombre de Auditoría</label>
+                        <input type="text" id="nombreAuditoria" placeholder="Ingrese el nombre de la auditoría..." />
+                        <h3 style="margin-top:14px;color:var(--vino)">Objetivos</h3>
+                        <div id="objetivosContainer" class="objetivos-grid"></div>
+                    </div>
+                    <div class="card">
+                        <label>Alcance</label>
+                        <textarea id="alcanceInput" placeholder="Describa el alcance..."></textarea>
+                        <label style="margin-top:14px">Riesgos</label>
+                        <div class="risk-text">Ver los riesgos en el documento "Programa de auditorías"</div>
+                    </div>
+                    <div class="card">
+                        <div class="two-col">
+                            <div>
+                                <label>Modalidad</label>
+                                <select id="modalidadSelect">
+                                    <option value=""></option>
+                                    <option>Presencial</option>
+                                    <option>Virtual</option>
+                                    <option>Mixta</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Tipo de auditoría</label>
+                                <select id="tipoSelect">
+                                    <option value=""></option>
+                                    <option>Interna</option>
+                                    <option>Externa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h3 style="margin-top:16px;color:var(--vino)">Horarios</h3>
+                        <div id="horariosContainer"></div>
+                        <button class="btn add-btn" onclick="agregarHorario()">+ Agregar horario</button>
+
+                        <label>🗒️ Observaciones</label>
+                        <textarea id="obsInput" placeholder="Notas internas..."></textarea>
+
+                        <div style="margin-top:14px;display:flex;gap:10px">
+                            <button class="btn" onclick="accionGuardarYCrear()">Guardar y crear</button>
+                            <button class="btn secondary" onclick="limpiarFormulario()">Limpiar formulario</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right card">
+                    <div class="preview-title">Vista previa del Plan</div>
+                    <div id="previewArea">
+                        <div class="preview-block">
+                            <div class="preview-row"><strong>ID:</strong> <span id="pv_id">—</span></div>
+                            <div class="preview-row"><strong>Nombre Auditoría:</strong> <span id="pv_nombre">—</span></div>
+                        </div>
+                        <div class="preview-block">
+                            <div class="preview-row"><strong>Objetivos:</strong></div>
+                            <div style="margin-left:10px;font-size:13px"><span id="pv_objetivos">—</span></div>
+                        </div>
+                        <div class="preview-block">
+                            <div class="preview-row"><strong>Alcance:</strong> <span id="pv_alcance">—</span></div>
+                            <div class="preview-row"><strong>Riesgos:</strong> Ver documento "Programa de auditorías"</div>
+                        </div>
+                        <div class="preview-block">
+                            <div class="preview-row"><strong>Modalidad:</strong> <span id="pv_modalidad">—</span></div>
+                            <div class="preview-row"><strong>Tipo de Auditoría:</strong> <span id="pv_tipo">—</span></div>
+                        </div>
+                        <div class="preview-block" id="pv_horarios_block">
+                            <strong>Horarios y Criterios:</strong>
+                            <div id="pv_horarios">—</div>
+                        </div>
+                        <div class="preview-block">
+                            <div class="preview-row"><strong>Observaciones:</strong> <span id="pv_obs">—</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="vistaCalendario" class="hidden">
+            <h2 style="color:var(--vino);margin-top:20px">📅 Calendario de Auditorías</h2>
+            <div style="margin:15px 0;display:flex;gap:10px;align-items:center">
+                <button class="btn ghost" onclick="cambiarMes(-1)">◀ Anterior</button>
+                <span id="mesActual" style="font-weight:700;font-size:18px"></span>
+                <button class="btn ghost" onclick="cambiarMes(1)">Siguiente ▶</button>
+            </div>
+            <div class="calendar-container" id="calendarioGrid"></div>
+        </div>
+    </div>
+    <div id="msgArea"></div>
+</div>
+
+<div id="modalCriterios" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle" style="margin:0;color:var(--vino)">Seleccionar Criterios</h3>
+            <button class="modal-close" onclick="cerrarModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div style="margin-top:15px;display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn ghost" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn" onclick="guardarCriterios()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalPersonas" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalPersonasTitle" style="margin:0;color:var(--vino)">Seleccionar Personas</h3>
+            <button class="modal-close" onclick="cerrarModalPersonas()">×</button>
+        </div>
+        <div class="search-box">
+            <input type="text" id="buscarPersona" placeholder="🔍 Buscar por nombre..." />
+        </div>
+        <div class="modal-body" id="modalPersonasBody" style="max-height:400px;overflow-y:auto"></div>
+        <div style="margin-top:15px;display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn ghost" onclick="cerrarModalPersonas()">Cancelar</button>
+            <button class="btn" onclick="guardarPersonasSeleccionadas()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay-editar" id="overlayEditar" onclick="cerrarPanelEditar()"></div>
+<div class="panel-editar" id="panelEditar">
+    <div class="panel-editar-header">
+        <h2 style="margin:0">✏️ Editar Auditoría</h2>
+        <button class="modal-close" onclick="cerrarPanelEditar()" style="color:white">×</button>
+    </div>
+    <div class="panel-editar-body">
+        <div id="selectorIDs">
+            <h3 style="color:var(--vino)">Selecciona una auditoría:</h3>
+            <div class="search-ids">
+                <input type="text" id="buscarID" placeholder="🔍 Buscar ID..." oninput="filtrarIDs()" />
+            </div>
+            <div id="idsGrid" class="ids-grid"></div>
+        </div>
+        <div id="formularioEdicion" class="hidden"></div>
+    </div>
+</div>
+
+<script>
+    let auditores = [],
+        auditados = [],
+        procesos = {},
+        normas = {},
+        registroCalendario = [];
+
+    const objetivosList = [
+        "Necesidades y expectativas de las partes interesadas",
+        "Cambios en los requisitos de los procesos, productos o servicios",
+        "Verificar el nivel de madurez de los Sistemas de Gestión",
+        "Riesgos y oportunidades identificados",
+        "Requisitos del Sistema de Gestión",
+        "Requisitos legales y reglamentarios",
+        "Evaluación a proveedores externos",
+        "Resultados de auditorías previas"
+    ];
+
+    let planActivo = {
+        nombre: "",
+        objetivos: [],
+        alcance: "",
+        modalidad: "",
+        tipo: "",
+        horarios: [],
+        observaciones: ""
+    };
+
+    let horarioIdCounter = 0;
+    let horariosCriterios = {};
+    let modalHorarioActual = null;
+    let modalTipoActual = null;
+    let modalNivelActual = 0;
+    let modalProcesoSeleccionado = null;
+    let modalNormaSeleccionada = null;
+    let fechaCalendario = new Date();
+    let modalPersonasTipo = null;
+    let personasSeleccionadas = [];
+    let auditoriaEnEdicion = null;
+    let todosLosIDs = []; // Para el buscador de IDs
+
+    // Inicialización
+    (function() {
+        try {
+            const email = Session && Session.getActiveUser ? Session.getActiveUser().getEmail() : "Usuario";
+            document.getElementById("userEmail").textContent = email;
+        } catch (e) {
+            console.log("No se pudo obtener email:", e);
+        }
+
+        console.log("🚀 Iniciando carga de datos...");
+
+        google.script.run
+            .withSuccessHandler(data => {
+                auditores = data || [];
+                console.log("✅ Auditores:", auditores.length);
+            })
+            .withFailureHandler(err => console.error("❌ Error auditores:", err))
+            .obtenerAuditores();
+
+        google.script.run
+            .withSuccessHandler(data => {
+                auditados = data || [];
+                console.log("✅ Auditados:", auditados.length);
+            })
+            .withFailureHandler(err => console.error("❌ Error auditados:", err))
+            .obtenerAuditados();
+
+        google.script.run
+            .withSuccessHandler(data => {
+                procesos = data || {};
+                console.log("✅ Procesos:", Object.keys(procesos).length);
+            })
+            .withFailureHandler(err => console.error("❌ Error procesos:", err))
+            .obtenerProcesos();
+
+        google.script.run
+            .withSuccessHandler(data => {
+                normas = data || {};
+                console.log("✅ Normas:", Object.keys(normas).length);
+            })
+            .withFailureHandler(err => console.error("❌ Error normas:", err))
+            .obtenerNormas();
+
+        google.script.run
+            .withSuccessHandler(data => {
+                registroCalendario = data || [];
+                console.log("✅ Calendario:", registroCalendario.length);
+            })
+            .withFailureHandler(err => console.error("❌ Error calendario:", err))
+            .obtenerAuditoriasCalendario();
+
+        renderObjetivos();
+        agregarHorario();
+    })();
+
+    // --- Funciones de Vista ---
+
+    function mostrarVistaPlanear() {
+        document.getElementById("vistaPlanear").classList.remove("hidden");
+        document.getElementById("vistaCalendario").classList.add("hidden");
+    }
+
+    function mostrarVistaCalendario() {
+        document.getElementById("vistaPlanear").classList.add("hidden");
+        document.getElementById("vistaCalendario").classList.remove("hidden");
+        renderCalendario();
+    }
+
+    // --- Lógica del Planificador ---
+
+    function renderObjetivos() {
+        const container = document.getElementById("objetivosContainer");
+        container.innerHTML = "";
+        objetivosList.forEach(obj => {
+            const div = document.createElement("div");
+            div.className = "objetivo-item";
+            div.innerHTML = `<label><input type="checkbox" value="${escapeHtml(obj)}"> ${escapeHtml(obj)}</label>`;
+            container.appendChild(div);
+        });
+        container.querySelectorAll("input").forEach(el => el.addEventListener("change", actualizarPreview));
+    }
+
+    function agregarHorario() {
+        const container = document.getElementById("horariosContainer");
+        const id = horarioIdCounter++;
+        const div = document.createElement("div");
+        div.className = "horario-block";
+        div.dataset.id = id;
+
+        div.innerHTML = `
+            ${id > 0 ? `<button class="remove-btn" onclick="eliminarHorario(${id})">✕</button>` : ""}
+            <div class="three-col">
+                <div><label>Fecha</label><input type="date" class="horario-fecha" data-id="${id}"/></div>
+                <div><label>Hora inicio</label><input type="time" class="horario-inicio" data-id="${id}"/></div>
+                <div><label>Hora fin</label><input type="time" class="horario-fin" data-id="${id}"/></div>
+            </div>
+            <label>Descripción (opcional)</label>
+            <input type="text" class="horario-desc" data-id="${id}" placeholder="Ej: Reunión de apertura"/>
+            <div class="two-col" style="margin-top:12px">
+                <button class="btn ghost" onclick="abrirModalAuditores(${id})">👤 Auditores</button>
+                <button class="btn ghost" onclick="abrirModalAuditados(${id})">👥 Auditados</button>
+            </div>
+            <div id="personas-seleccionadas-${id}" style="margin-top:10px;padding:10px;background:#f9f9f9;border-radius:6px;min-height:40px">
+                <strong>Personas:</strong> <span class="personas-texto">Ninguna</span>
+            </div>
+            <div style="margin-top:12px">
+                <h4 style="color:var(--vino);margin-bottom:8px">Criterios</h4>
+                <div class="two-col">
+                    <button class="btn ghost" onclick="abrirModalProcesos(${id})">🧩 Procesos</button>
+                    <button class="btn ghost" onclick="abrirModalNormas(${id})">📋 Requisitos</button>
+                </div>
+                <div id="criterios-seleccionados-${id}" class="criterios-seleccionados">
+                    <strong>Criterios seleccionados:</strong>
+                    <div class="criterios-texto">Ninguno</div>
+                </div>
+            </div>`;
+
+        container.appendChild(div);
+
+        div.querySelectorAll("input").forEach(el => el.addEventListener("change", actualizarPreview));
+
+        if (!horariosCriterios[id]) {
+            horariosCriterios[id] = {
+                procesos: [],
+                normas: [],
+                auditores: [],
+                auditados: [],
+                correosAuditores: [],
+                correosAuditados: []
+            };
+        }
+    }
+
+    function eliminarHorario(id) {
+        const el = document.querySelector(`[data-id="${id}"]`).closest(".horario-block");
+        if (el) el.remove();
+        delete horariosCriterios[id];
+        actualizarPreview();
+    }
+
+    // --- Modales de Personas (Auditores/Auditados) ---
+
+    function abrirModalAuditores(id) {
+        modalHorarioActual = id;
+        modalPersonasTipo = "auditores";
+        personasSeleccionadas = horariosCriterios[id].auditores || [];
+        mostrarModalPersonas("Seleccionar Auditores", auditores);
+    }
+
+    function abrirModalAuditados(id) {
+        modalHorarioActual = id;
+        modalPersonasTipo = "auditados";
+        personasSeleccionadas = horariosCriterios[id].auditados || [];
+        mostrarModalPersonas("Seleccionar Auditados", auditados);
+    }
+
+    function mostrarModalPersonas(titulo, lista) {
+        document.getElementById("modalPersonasTitle").textContent = titulo;
+        const body = document.getElementById("modalPersonasBody");
+        body.innerHTML = "";
+
+        lista.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "checklist-item";
+            const isChecked = personasSeleccionadas.includes(p.nombre);
+            div.innerHTML = `<label><input type="checkbox" value="${escapeHtml(p.nombre)}" data-correo="${escapeHtml(p.correo)}" ${isChecked ? "checked" : ""}> ${escapeHtml(p.nombre)} • ${escapeHtml(p.correo)}</label>`;
+            body.appendChild(div);
+        });
+
+        document.getElementById("buscarPersona").value = "";
+        document.getElementById("buscarPersona").oninput = function() {
+            const term = this.value.toLowerCase();
+            body.querySelectorAll(".checklist-item").forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? "" : "none";
+            });
+        };
+
+        document.getElementById("modalPersonas").classList.add("active");
+    }
+
+    function cerrarModalPersonas() {
+        document.getElementById("modalPersonas").classList.remove("active");
+        modalHorarioActual = null;
+        modalPersonasTipo = null;
+        personasSeleccionadas = [];
+    }
+
+    function guardarPersonasSeleccionadas() {
+        const checks = document.querySelectorAll('#modalPersonasBody input[type="checkbox"]:checked');
+        const nombres = Array.from(checks).map(c => c.value);
+        const correos = Array.from(checks).map(c => c.getAttribute("data-correo"));
+
+        if (nombres.length === 0) {
+            flashMessage("⚠️ Selecciona al menos una persona", 2000);
+            return;
+        }
+
+        const dataHorario = horariosCriterios[modalHorarioActual];
+        if (modalPersonasTipo === "auditores") {
+            dataHorario.auditores = nombres;
+            dataHorario.correosAuditores = correos;
+        } else {
+            dataHorario.auditados = nombres;
+            dataHorario.correosAuditados = correos;
+        }
+
+        actualizarPersonasVisuales(modalHorarioActual);
+        cerrarModalPersonas();
+        actualizarPreview();
+        flashMessage("✅ Personas guardadas", 1500);
+    }
+
+    function actualizarPersonasVisuales(id) {
+        const container = document.getElementById(`personas-seleccionadas-${id}`);
+        if (!container) return;
+
+        const data = horariosCriterios[id];
+        const textoDiv = container.querySelector(".personas-texto");
+        let html = "";
+
+        if (data.auditores && data.auditores.length > 0) {
+            html += "<strong>👤 Auditores:</strong> " + data.auditores.map(n => `<span class="persona-tag">${escapeHtml(n)}</span>`).join("");
+        }
+        if (data.auditados && data.auditados.length > 0) {
+            if (html) html += "<br>";
+            html += "<strong>👥 Auditados:</strong> " + data.auditados.map(n => `<span class="persona-tag">${escapeHtml(n)}</span>`).join("");
+        }
+
+        textoDiv.innerHTML = html || "Ninguna";
+    }
+
+    // --- Modales de Criterios (Procesos/Normas) ---
+
+    function abrirModalProcesos(id) {
+        modalHorarioActual = id;
+        modalTipoActual = "procesos";
+        modalNivelActual = 0;
+        modalProcesoSeleccionado = null;
+        document.getElementById("modalTitle").textContent = "Seleccionar Procesos y Subprocesos";
+        mostrarListaProcesos();
+        document.getElementById("modalCriterios").classList.add("active");
+    }
+
+    function mostrarListaProcesos() {
+        const body = document.getElementById("modalBody");
+        body.innerHTML = "";
+        const keys = Object.keys(procesos).sort();
+
+        if (keys.length === 0) {
+            body.innerHTML = '<div style="padding:20px;text-align:center;color:#999">No hay procesos disponibles</div>';
+            return;
+        }
+
+        keys.forEach(p => {
+            const btn = document.createElement("button");
+            btn.className = "btn ghost";
+            btn.textContent = p;
+            btn.style.width = "100%";
+            btn.style.marginBottom = "8px";
+            btn.onclick = () => {
+                modalProcesoSeleccionado = p;
+                modalNivelActual = 1;
+                mostrarSubprocesos();
+            };
+            body.appendChild(btn);
+        });
+    }
+
+    function mostrarSubprocesos() {
+        const body = document.getElementById("modalBody");
+        body.innerHTML = `<h4 style="color:var(--vino);margin-bottom:10px">Proceso: ${escapeHtml(modalProcesoSeleccionado)}</h4>`;
+        const lista = procesos[modalProcesoSeleccionado] || [];
+
+        if (lista.length === 0) {
+            body.innerHTML += '<div style="padding:10px;color:#999">No hay subprocesos disponibles</div>';
+        } else {
+            lista.forEach(sub => {
+                const div = document.createElement("div");
+                div.className = "checklist-item";
+                div.innerHTML = `<label><input type="checkbox" value="${escapeHtml(sub)}"> ${escapeHtml(sub)}</label>`;
+                body.appendChild(div);
+            });
+        }
+
+        const btnBack = document.createElement("button");
+        btnBack.className = "btn ghost";
+        btnBack.textContent = "⬅ Volver a Procesos";
+        btnBack.style.marginTop = "10px";
+        btnBack.onclick = () => {
+            modalNivelActual = 0;
+            mostrarListaProcesos();
+        };
+        body.appendChild(btnBack);
+    }
+
+    function abrirModalNormas(id) {
+        modalHorarioActual = id;
+        modalTipoActual = "normas";
+        modalNivelActual = 0;
+        modalNormaSeleccionada = null;
+        document.getElementById("modalTitle").textContent = "Seleccionar Normas y Requisitos";
+        mostrarListaNormas();
+        document.getElementById("modalCriterios").classList.add("active");
+    }
+
+    function mostrarListaNormas() {
+        const body = document.getElementById("modalBody");
+        body.innerHTML = "";
+        const keys = Object.keys(normas).sort();
+
+        if (keys.length === 0) {
+            body.innerHTML = '<div style="padding:20px;text-align:center;color:#999">No hay normas disponibles</div>';
+            return;
+        }
+
+        keys.forEach(n => {
+            const btn = document.createElement("button");
+            btn.className = "btn ghost";
+            btn.textContent = n;
+            btn.style.width = "100%";
+            btn.style.marginBottom = "8px";
+            btn.onclick = () => {
+                modalNormaSeleccionada = n;
+                modalNivelActual = 1;
+                mostrarRequisitos();
+            };
+            body.appendChild(btn);
+        });
+    }
+
+    function mostrarRequisitos() {
+        const body = document.getElementById("modalBody");
+        body.innerHTML = `<h4 style="color:var(--vino);margin-bottom:10px">Norma: ${escapeHtml(modalNormaSeleccionada)}</h4>`;
+        const lista = normas[modalNormaSeleccionada] || [];
+
+        if (lista.length === 0) {
+            body.innerHTML += '<div style="padding:10px;color:#999">No hay requisitos verdes disponibles</div>';
+        } else {
+            lista.forEach(req => {
+                const div = document.createElement("div");
+                div.className = "checklist-item";
+                div.innerHTML = `<label><input type="checkbox" value="${escapeHtml(req)}"> ${escapeHtml(req)}</label>`;
+                body.appendChild(div);
+            });
+        }
+
+        const btnBack = document.createElement("button");
+        btnBack.className = "btn ghost";
+        btnBack.textContent = "⬅ Volver a Normas";
+        btnBack.style.marginTop = "10px";
+        btnBack.onclick = () => {
+            modalNivelActual = 0;
+            mostrarListaNormas();
+        };
+        body.appendChild(btnBack);
+    }
+
+    function guardarCriterios() {
+        const checks = document.querySelectorAll('#modalBody input[type="checkbox"]:checked');
+        const seleccionados = Array.from(checks).map(c => c.value);
+
+        if (seleccionados.length === 0) {
+            flashMessage("⚠️ Selecciona al menos un elemento", 2000);
+            return;
+        }
+
+        const dataHorario = horariosCriterios[modalHorarioActual];
+
+        if (modalTipoActual === "procesos" && modalProcesoSeleccionado) {
+            const existe = dataHorario.procesos.find(p => p.proceso === modalProcesoSeleccionado);
+            if (existe) {
+                existe.subprocesos = seleccionados;
+            } else {
+                dataHorario.procesos.push({
+                    proceso: modalProcesoSeleccionado,
+                    subprocesos: seleccionados
+                });
+            }
+        } else if (modalTipoActual === "normas" && modalNormaSeleccionada) {
+            const existe = dataHorario.normas.find(n => n.norma === modalNormaSeleccionada);
+            if (existe) {
+                existe.requisitos = seleccionados;
+            } else {
+                dataHorario.normas.push({
+                    norma: modalNormaSeleccionada,
+                    requisitos: seleccionados
+                });
+            }
+        }
+
+        actualizarCriteriosVisuales(modalHorarioActual);
+        cerrarModal();
+        actualizarPreview();
+        flashMessage("✅ Criterios guardados", 1500);
+    }
+
+    function actualizarCriteriosVisuales(id) {
+        const container = document.getElementById(`criterios-seleccionados-${id}`);
+        if (!container) return;
+        const data = horariosCriterios[id];
+        const textoDiv = container.querySelector(".criterios-texto");
+
+        if (!data || (data.procesos.length === 0 && data.normas.length === 0)) {
+            textoDiv.innerHTML = "Ninguno";
+            return;
+        }
+
+        let html = "";
+        data.procesos.forEach(p => {
+            html += `<div style="margin-bottom:8px"><strong>🧩 ${escapeHtml(p.proceso)}:</strong><br><div style="margin-left:15px">`;
+            p.subprocesos.forEach(sub => {
+                html += `<span class="criterio-tag">${escapeHtml(sub)}</span>`;
+            });
+            html += "</div></div>";
+        });
+
+        data.normas.forEach(n => {
+            html += `<div style="margin-bottom:8px"><strong>📋 ${escapeHtml(n.norma)}:</strong><br><div style="margin-left:15px">`;
+            n.requisitos.forEach(req => {
+                html += `<span class="criterio-tag">${escapeHtml(req)}</span>`;
+            });
+            html += "</div></div>";
+        });
+
+        textoDiv.innerHTML = html;
+    }
+
+    function cerrarModal() {
+        document.getElementById("modalCriterios").classList.remove("active");
+        modalHorarioActual = null;
+        modalTipoActual = null;
+        modalNivelActual = 0;
+        modalProcesoSeleccionado = null;
+        modalNormaSeleccionada = null;
+    }
+
+    // --- Vista Previa y Guardado ---
+
+    function actualizarPreview() {
+        planActivo.nombre = document.getElementById("nombreAuditoria").value;
+        document.getElementById("pv_nombre").textContent = planActivo.nombre || "—";
+
+        const objs = Array.from(document.querySelectorAll("#objetivosContainer input:checked")).map(c => c.value);
+        planActivo.objetivos = objs;
+        document.getElementById("pv_objetivos").textContent = objs.length ? objs.join(", ") : "—";
+        planActivo.alcance = document.getElementById("alcanceInput").value;
+        document.getElementById("pv_alcance").textContent = planActivo.alcance || "—";
+
+        planActivo.modalidad = document.getElementById("modalidadSelect").value;
+        planActivo.tipo = document.getElementById("tipoSelect").value;
+        document.getElementById("pv_modalidad").textContent = planActivo.modalidad || "—";
+        document.getElementById("pv_tipo").textContent = planActivo.tipo || "—";
+
+        // Procesar Horarios
+        const bloques = document.querySelectorAll(".horario-block");
+        const horariosFinales = [];
+        const horariosPorDia = {};
+
+        bloques.forEach(b => {
+            const id = b.dataset.id;
+            const fecha = b.querySelector(".horario-fecha").value;
+            const inicio = b.querySelector(".horario-inicio").value;
+            const fin = b.querySelector(".horario-fin").value;
+            const desc = b.querySelector(".horario-desc").value;
+            const criterios = horariosCriterios[id] || {};
+
+            if (fecha && inicio && fin) {
+                const h = {
+                    fecha: fecha,
+                    inicio: inicio,
+                    fin: fin,
+                    descripcion: desc,
+                    auditores: criterios.auditores || [],
+                    auditados: criterios.auditados || [],
+                    correosAuditores: criterios.correosAuditores || [],
+                    correosAuditados: criterios.correosAuditados || [],
+                    procesos: criterios.procesos || [],
+                    normas: criterios.normas || []
+                };
+                horariosFinales.push(h);
+
+                if (!horariosPorDia[fecha]) horariosPorDia[fecha] = [];
+                horariosPorDia[fecha].push(h);
+            }
+        });
+
+        planActivo.horarios = horariosFinales;
+
+        let htmlHorarios = "";
+        const fechasSorted = Object.keys(horariosPorDia).sort();
+
+        if (fechasSorted.length === 0) {
+            htmlHorarios = '<div style="color:#999;font-style:italic">—</div>';
+        } else {
+            fechasSorted.forEach((f, idx) => {
+                htmlHorarios += '<div class="preview-day">';
+                htmlHorarios += `<strong style="color:var(--rojo)">Día ${idx + 1} (${f})</strong>`;
+                horariosPorDia[f].forEach(h => {
+                    htmlHorarios += `<div style="margin-left:10px;margin-top:4px">• ${h.inicio} - ${h.fin}${h.descripcion ? ": " + escapeHtml(h.descripcion) : ""}</div>`;
+
+                    if (h.auditores && h.auditores.length > 0) {
+                        htmlHorarios += `<div style="margin-left:20px;font-size:12px;color:#666">👤 Auditores: ${h.auditores.map(escapeHtml).join(", ")}</div>`;
+                    }
+                    if (h.auditados && h.auditados.length > 0) {
+                        htmlHorarios += `<div style="margin-left:20px;font-size:12px;color:#666">👥 Auditados: ${h.auditados.map(escapeHtml).join(", ")}</div>`;
+                    }
+                    if (h.procesos && h.procesos.length > 0) {
+                        h.procesos.forEach(p => {
+                            htmlHorarios += `<div style="margin-left:20px;font-size:12px;color:#666">🧩 ${escapeHtml(p.proceso)}: ${p.subprocesos.map(escapeHtml).join(", ")}</div>`;
+                        });
+                    }
+                    if (h.normas && h.normas.length > 0) {
+                        h.normas.forEach(n => {
+                            htmlHorarios += `<div style="margin-left:20px;font-size:12px;color:#666">📋 ${escapeHtml(n.norma)}: ${n.requisitos.map(escapeHtml).join(", ")}</div>`;
+                        });
+                    }
+                });
+                htmlHorarios += "</div>";
+            });
+        }
+
+        document.getElementById("pv_horarios").innerHTML = htmlHorarios;
+
+        planActivo.observaciones = document.getElementById("obsInput").value;
+        document.getElementById("pv_obs").textContent = planActivo.observaciones || "—";
+    }
+
+    function accionGuardarYCrear() {
+        actualizarPreview();
+
+        if (!planActivo.nombre) {
+            flashMessage("⚠️ Debe ingresar un nombre para la auditoría", 3000);
+            return;
+        }
+        if (planActivo.horarios.length === 0) {
+            flashMessage("⚠️ Debe agregar al menos un horario", 3000);
+            return;
+        }
+
+        // Validar que cada horario tenga al menos 1 auditor y 1 auditado
+        let personasOk = true;
+        planActivo.horarios.forEach(h => {
+            if ((!h.auditores || h.auditores.length === 0) || (!h.auditados || h.auditados.length === 0)) {
+                personasOk = false;
+            }
+        });
+
+        if (!personasOk) {
+            flashMessage("⚠️ Cada horario debe tener al menos un auditor y un auditado", 3000);
+            return;
+        }
+
+        const payload = {
+            nombre: planActivo.nombre,
+            objetivos: planActivo.objetivos,
+            alcance: planActivo.alcance,
+            modalidad: planActivo.modalidad,
+            tipo: planActivo.tipo,
+            horarios: planActivo.horarios,
+            observaciones: planActivo.observaciones
+        };
+
+        console.log("📤 Enviando auditoría:", payload);
+        flashMessage("⏳ Guardando auditoría...", 0);
+
+        google.script.run
+            .withSuccessHandler(res => {
+                if (res && res.success) {
+                    document.getElementById("pv_id").textContent = res.id;
+                    flashMessage("✅ Auditoría creada: " + res.id, 4000);
+                    // Recargar calendario
+                    google.script.run.withSuccessHandler(data => {
+                        registroCalendario = data || [];
+                    }).obtenerAuditoriasCalendario();
+                    limpiarFormulario();
+                } else {
+                    flashMessage("❌ Error: " + (res.error || "Error desconocido"), 5000);
+                }
+            })
+            .withFailureHandler(err => {
+                console.error("❌", err);
+                flashMessage("❌ Error al guardar: " + err, 5000);
+            })
+            .crearAuditoria(payload);
+    }
+
+    function limpiarFormulario() {
+        planActivo = {
+            nombre: "",
+            objetivos: [],
+            alcance: "",
+            modalidad: "",
+            tipo: "",
+            horarios: [],
+            observaciones: ""
+        };
+        horariosCriterios = {};
+
+        document.getElementById("nombreAuditoria").value = "";
+        document.getElementById("alcanceInput").value = "";
+        document.getElementById("modalidadSelect").value = "";
+        document.getElementById("tipoSelect").value = "";
+        document.getElementById("obsInput").value = "";
+        document.querySelectorAll("#objetivosContainer input:checked").forEach(el => el.checked = false);
+        document.getElementById("horariosContainer").innerHTML = "";
+
+        horarioIdCounter = 0;
+        agregarHorario();
+        actualizarPreview();
+        flashMessage("✅ Formulario limpiado", 2000);
+    }
+
+    // --- Edición de Auditorías ---
+
+    function abrirPanelEditar() {
+        document.getElementById("panelEditar").classList.add("active");
+        document.getElementById("overlayEditar").classList.add("active");
+        document.getElementById("selectorIDs").classList.remove("hidden");
+        document.getElementById("formularioEdicion").classList.add("hidden");
+
+        google.script.run
+            .withSuccessHandler(ids => {
+                todosLosIDs = ids || [];
+                const grid = document.getElementById("idsGrid");
+                grid.innerHTML = "";
+                if (ids.length === 0) {
+                    grid.innerHTML = '<div style="padding:20px;text-align:center;color:#999">No hay auditorías registradas</div>';
+                    return;
+                }
+                ids.forEach(id => {
+                    const btn = document.createElement("div");
+                    btn.className = "id-btn";
+                    btn.textContent = id;
+                    btn.dataset.id = id;
+                    btn.onclick = () => cargarAuditoriaParaEditar(id);
+                    grid.appendChild(btn);
+                });
+            })
+            .obtenerIDsAuditorias();
+    }
+
+    function cerrarPanelEditar() {
+        document.getElementById("panelEditar").classList.remove("active");
+        document.getElementById("overlayEditar").classList.remove("active");
+        auditoriaEnEdicion = null;
+    }
+
+    function filtrarIDs() {
+        const termino = document.getElementById("buscarID").value.toLowerCase();
+        const botones = document.querySelectorAll(".id-btn");
+        
+        botones.forEach(btn => {
+            const id = btn.dataset.id.toLowerCase();
+            if (id.includes(termino)) {
+                btn.style.display = "";
+            } else {
+                btn.style.display = "none";
+            }
+        });
+    }
+
+    function cargarAuditoriaParaEditar(id) {
+        console.log("📝 Cargando auditoría:", id);
+        flashMessage("⏳ Cargando auditoría...", 0);
+        
+        google.script.run
+            .withSuccessHandler(aud => {
+                if (!aud) {
+                    flashMessage("❌ No se encontró la auditoría", 3000);
+                    return;
+                }
+                auditoriaEnEdicion = aud;
+                console.log("✅ Auditoría cargada:", aud);
+                
+                document.getElementById("selectorIDs").classList.add("hidden");
+                const form = document.getElementById("formularioEdicion");
+                form.classList.remove("hidden");
+                
+                generarFormularioEdicionCompleto(aud);
+                flashMessage("✅ Auditoría cargada", 1500);
+            })
+            .withFailureHandler(err => {
+                console.error("❌ Error:", err);
+                flashMessage("❌ Error cargando auditoría: " + err, 3000);
+            })
+            .obtenerAuditoriaPorID(id);
+    }
+
+    function generarFormularioEdicionCompleto(aud) {
+        const form = document.getElementById("formularioEdicion");
+        
+        let html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h3 style="color:var(--vino);margin:0">Editando: ${escapeHtml(aud.id)}</h3>
+                <button class="btn ghost" onclick="volverASelectorIDs()">⬅ Volver</button>
+            </div>
+            
+            <div class="card">
+                <label>Nombre de Auditoría</label>
+                <input type="text" id="edit_nombre" value="${escapeHtml(aud.nombre || "")}"/>
+                
+                <h4 style="margin-top:14px;color:var(--vino)">Objetivos</h4>
+                <div id="edit_objetivos" class="objetivos-grid">`;
+        
+        objetivosList.forEach(obj => {
+            const isChecked = aud.objetivos && aud.objetivos.includes(obj);
+            html += `<div class="objetivo-item"><label><input type="checkbox" value="${escapeHtml(obj)}" ${isChecked ? "checked" : ""}> ${escapeHtml(obj)}</label></div>`;
+        });
+        
+        html += `</div>
+                
+                <label>Alcance</label>
+                <textarea id="edit_alcance">${escapeHtml(aud.alcance || "")}</textarea>
+                
+                <div class="two-col">
+                    <div>
+                        <label>Modalidad</label>
+                        <select id="edit_modalidad">
+                            <option value=""></option>
+                            <option ${aud.modalidad === "Presencial" ? "selected" : ""}>Presencial</option>
+                            <option ${aud.modalidad === "Virtual" ? "selected" : ""}>Virtual</option>
+                            <option ${aud.modalidad === "Mixta" ? "selected" : ""}>Mixta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Tipo</label>
+                        <select id="edit_tipo">
+                            <option value=""></option>
+                            <option ${aud.tipo === "Interna" ? "selected" : ""}>Interna</option>
+                            <option ${aud.tipo === "Externa" ? "selected" : ""}>Externa</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <h4 style="margin-top:16px;color:var(--vino)">Horarios</h4>
+                <div id="edit_horarios_container"></div>
+                
+                <label>Observaciones</label>
+                <textarea id="edit_obs">${escapeHtml(aud.observaciones || "")}</textarea>
+            </div>
+            
+            <div style="margin-top:20px;display:flex;gap:10px">
+                <button class="btn" onclick="guardarEdicion()">💾 Guardar Cambios</button>
+                <button class="btn secondary" onclick="cerrarPanelEditar()">Cancelar</button>
+            </div>`;
+        
+        form.innerHTML = html;
+        
+        // Cargar horarios
+        const horariosContainer = document.getElementById("edit_horarios_container");
+        aud.horarios.forEach((h, idx) => {
+            const horarioDiv = document.createElement("div");
+            horarioDiv.className = "horario-block";
+            horarioDiv.style.marginBottom = "15px";
+            
+            let horariosHTML = `
+                <strong style="color:var(--vino)">Horario ${idx + 1}</strong>
+                <div class="three-col" style="margin-top:10px">
+                    <div>
+                        <label>Fecha</label>
+                        <input type="date" class="edit-horario-fecha" value="${h.fecha || ""}" readonly style="background:#f5f5f5"/>
+                    </div>
+                    <div>
+                        <label>Hora inicio</label>
+                        <input type="time" class="edit-horario-inicio" value="${h.inicio || ""}" readonly style="background:#f5f5f5"/>
+                    </div>
+                    <div>
+                        <label>Hora fin</label>
+                        <input type="time" class="edit-horario-fin" value="${h.fin || ""}" readonly style="background:#f5f5f5"/>
+                    </div>
+                </div>
+                <label>Descripción</label>
+                <input type="text" class="edit-horario-desc" value="${escapeHtml(h.descripcion || "")}" readonly style="background:#f5f5f5"/>
+                
+                <div style="margin-top:10px;padding:10px;background:#e8f5e9;border-radius:6px">
+                    <strong>👤 Auditores:</strong> ${h.auditores && h.auditores.length > 0 ? h.auditores.join(", ") : "Ninguno"}<br>
+                    <strong>👥 Auditados:</strong> ${h.auditados && h.auditados.length > 0 ? h.auditados.join(", ") : "Ninguno"}
+                </div>`;
+            
+            if (h.procesos && h.procesos.length > 0) {
+                horariosHTML += '<div style="margin-top:10px;padding:10px;background:#fff3e0;border-radius:6px"><strong>🧩 Procesos:</strong>';
+                h.procesos.forEach(p => {
+                    horariosHTML += `<div style="margin-left:15px">• ${escapeHtml(p.proceso)}: ${p.subprocesos.map(escapeHtml).join(", ")}</div>`;
+                });
+                horariosHTML += '</div>';
+            }
+            
+            if (h.normas && h.normas.length > 0) {
+                horariosHTML += '<div style="margin-top:10px;padding:10px;background:#e3f2fd;border-radius:6px"><strong>📋 Normas:</strong>';
+                h.normas.forEach(n => {
+                    horariosHTML += `<div style="margin-left:15px">• ${escapeHtml(n.norma)}: ${n.requisitos.map(escapeHtml).join(", ")}</div>`;
+                });
+                horariosHTML += '</div>';
+            }
+            
+            horarioDiv.innerHTML = horariosHTML;
+            horariosContainer.appendChild(horarioDiv);
+        });
+    }
+
+    function volverASelectorIDs() {
+        document.getElementById("selectorIDs").classList.remove("hidden");
+        document.getElementById("formularioEdicion").classList.add("hidden");
+        auditoriaEnEdicion = null;
+    }
+
+    function guardarEdicion() {
+        if (!auditoriaEnEdicion) {
+            flashMessage("❌ No hay auditoría cargada", 3000);
+            return;
+        }
+
+        const nombre = document.getElementById("edit_nombre").value;
+        const objs = Array.from(document.querySelectorAll("#edit_objetivos input:checked")).map(c => c.value);
+        const alcance = document.getElementById("edit_alcance").value;
+        const modalidad = document.getElementById("edit_modalidad").value;
+        const tipo = document.getElementById("edit_tipo").value;
+        const obs = document.getElementById("edit_obs").value;
+
+        if (!nombre) {
+            flashMessage("⚠️ Debe ingresar un nombre para la auditoría", 3000);
+            return;
+        }
+
+        const payload = {
+            id: auditoriaEnEdicion.id,
+            nombre: nombre,
+            objetivos: objs,
+            alcance: alcance,
+            modalidad: modalidad,
+            tipo: tipo,
+            horarios: auditoriaEnEdicion.horarios, // Mantiene horarios originales
+            observaciones: obs
+        };
+
+        console.log("💾 Guardando edición:", payload);
+        flashMessage("⏳ Guardando cambios...", 0);
+
+        google.script.run
+            .withSuccessHandler(res => {
+                if (res && res.success) {
+                    flashMessage("✅ Auditoría actualizada: " + res.id, 4000);
+                    google.script.run.withSuccessHandler(data => {
+                        registroCalendario = data || [];
+                    }).obtenerAuditoriasCalendario();
+                    cerrarPanelEditar();
+                } else {
+                    flashMessage("❌ Error: " + (res.error || "Error desconocido"), 5000);
+                }
+            })
+            .withFailureHandler(err => {
+                console.error("❌", err);
+                flashMessage("❌ Error al guardar: " + err, 5000);
+            })
+            .editarAuditoria(payload);
+    }
+
+    // --- Calendario ---
+
+    function renderCalendario() {
+        const mesLabel = document.getElementById("mesActual");
+        const grid = document.getElementById("calendarioGrid");
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+        const year = fechaCalendario.getFullYear();
+        const month = fechaCalendario.getMonth();
+
+        mesLabel.textContent = `${meses[month]} ${year}`;
+
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startDay = firstDay.getDay();
+
+        grid.innerHTML = "";
+
+        // Cabeceras
+        diasSemana.forEach(d => {
+            const div = document.createElement("div");
+            div.style.textAlign = "center";
+            div.style.fontWeight = "700";
+            div.style.padding = "8px";
+            div.style.color = "var(--vino)";
+            div.textContent = d;
+            grid.appendChild(div);
+        });
+
+        // Espacios vacíos
+        for (let i = 0; i < startDay; i++) {
+            const div = document.createElement("div");
+            grid.appendChild(div);
+        }
+
+        // Días
+        for (let d = 1; d <= daysInMonth; d++) {
+            const fechaStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+            const auditoriasDia = registroCalendario.filter(r => {
+                const f = r.Fecha || r.fecha || "";
+                return f === fechaStr;
+            });
+
+            const div = document.createElement("div");
+            div.className = "calendar-day";
+            if (auditoriasDia.length > 0) div.classList.add("has-audit");
+
+            let tooltip = "";
+            if (auditoriasDia.length > 0) {
+                tooltip = `<div class="calendar-tooltip"><div style="font-weight:700;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:4px">${d} de ${meses[month]}</div>`;
+                auditoriasDia.forEach(a => {
+                    tooltip += `<div style="margin-bottom:8px;padding:6px;background:rgba(255,255,255,0.1);border-radius:4px">
+                    <div style="font-weight:600">${escapeHtml(a.ID || a.id || "")}</div>
+                    <div style="font-size:12px">📋 ${escapeHtml(a["Nombre Auditoría"] || a.Nombre || a.nombre || "")}</div>
+                    <div style="font-size:12px">👤 ${escapeHtml(a.Auditor || a.auditor || "")}</div>
+                    <div style="font-size:12px">👥 ${escapeHtml(a.Auditado || a.auditado || "")}</div>
+                    <div style="font-size:12px">⏰ ${escapeHtml(a["Hora Inicio"] || "")} - ${escapeHtml(a["Hora Fin"] || "")}</div>
+                    </div>`;
+                });
+                tooltip += "</div>";
+            }
+
+            div.innerHTML = `<div class="day-number">${d}</div>${auditoriasDia.length > 0 ? `<div class="badge">${auditoriasDia.length}</div>` : ""}${tooltip}`;
+            grid.appendChild(div);
+        }
+    }
+
+    function cambiarMes(delta) {
+        fechaCalendario.setMonth(fechaCalendario.getMonth() + delta);
+        renderCalendario();
+    }
+
+    // --- Utilidades ---
+
+    function escapeHtml(text) {
+        if (!text && text !== 0) return "";
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    function flashMessage(msg, duration) {
+        const area = document.getElementById("msgArea");
+        if (duration === 0) {
+            area.innerHTML = `<div class="card" style="background:#fff3cd;border-left:4px solid #ffc107">${escapeHtml(msg)}</div>`;
+        } else {
+            area.innerHTML = `<div class="card" style="background:#f0fff4;border-left:4px solid var(--success)">${escapeHtml(msg)}</div>`;
+            if (duration > 0) {
+                setTimeout(() => {
+                    area.innerHTML = "";
+                }, duration);
+            }
+        }
+    }
+
+    // Listeners globales
+    ["nombreAuditoria", "alcanceInput", "modalidadSelect", "tipoSelect", "obsInput"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", actualizarPreview);
+    });
+</script>
+</body>
+</html>

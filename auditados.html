@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría Programada</title>
+  <style>
+    body{font-family:Arial,sans-serif;background-color:#f5f5f5;padding:20px;margin:0}
+    .container{max-width:650px;margin:0 auto;background-color:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+    .header{background:linear-gradient(90deg,#9e1a18,#e62330);color:white;padding:25px;text-align:center}
+    .header h1{margin:0;font-size:24px}
+    .content{padding:30px;color:#333}
+    .field{margin-bottom:15px;line-height:1.6}
+    .field strong{color:#9e1a18}
+    .section-title{color:#9e1a18;font-size:18px;margin-top:25px;margin-bottom:15px;border-bottom:2px solid #e62330;padding-bottom:5px}
+    .horario-block{background:#f9f9f9;padding:12px;border-radius:6px;margin-bottom:10px;border-left:4px solid #e62330}
+    .horario-block strong{color:#9e1a18;display:block;margin-bottom:6px}
+    .criterio-box{background:#fff3e0;padding:10px;border-radius:6px;margin-top:8px;margin-left:15px;font-size:13px;border:1px solid #ffb74d}
+    .criterio-box strong{color:#e65100}
+    .footer{background-color:#f0f0f0;padding:20px;text-align:center;font-size:13px;color:#666}
+    .logo{margin-top:15px}
+    .importante{background:#ffe5e5;border-left:4px solid #e62330;padding:15px;margin:20px 0;border-radius:6px;font-size:14px}
+    .highlight-box{background:#e8f5e9;border:2px solid #4caf50;padding:15px;border-radius:8px;margin:15px 0}
+    .checklist{background:#f0f7ff;padding:15px;border-radius:8px;margin-top:10px;border-left:4px solid #2196f3}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 Notificación de Auditoría</h1>
+    </div>
+    <div class="content">
+      <p>Cordial saludo,</p>
+      <p>Te informamos que <strong>has sido programado para una auditoría</strong> como parte del proceso de mejora continua del Sistema Integrado de Gestión de nuestra organización.</p>
+      <div class="highlight-box">
+        <strong style="color:#2e7d32">📌 Esta es una oportunidad para:</strong>
+        <ul style="margin:10px 0;padding-left:20px">
+          <li>Demostrar el cumplimiento de nuestros procesos</li>
+          <li>Identificar áreas de mejora</li>
+          <li>Fortalecer nuestro sistema de gestión</li>
+        </ul>
+      </div>
+      <div class="field"><strong>🆔 ID de la Auditoría:</strong> <?= idAuditoria ?></div>
+      <div class="field"><strong>📋 Nombre:</strong> <?= datos.nombre || '' ?></div>
+      <h3 class="section-title">🎯 Objetivos de la Auditoría</h3>
+      <div class="field">
+        <? if (datos.objetivos && datos.objetivos.length > 0) { ?>
+          <ul style="margin:5px 0;padding-left:20px">
+            <? datos.objetivos.forEach(function(obj) { ?>
+              <li><?= obj ?></li>
+            <? }); ?>
+          </ul>
+        <? } else { ?>
+          No especificado
+        <? } ?>
+      </div>
+      <h3 class="section-title">📏 Alcance</h3>
+      <div class="field"><?= datos.alcance || 'No especificado' ?></div>
+      <h3 class="section-title">🧭 Detalles</h3>
+      <div class="field"><strong>Modalidad:</strong> <?= datos.modalidad || 'No especificado' ?></div>
+      <div class="field"><strong>Tipo de Auditoría:</strong> <?= datos.tipo || 'No especificado' ?></div>
+      <h3 class="section-title">📅 Horarios Programados y Criterios de Evaluación</h3>
+      <? if (datos.horariosAgrupados && datos.horariosAgrupados.length > 0) { ?>
+        <? datos.horariosAgrupados.forEach(function(dia) { ?>
+          <div class="horario-block">
+            <strong>Día <?= dia.numeroDia ?> - <?= dia.fecha ?></strong>
+            <? dia.horarios.forEach(function(h, idx) { ?>
+              <div style="margin-top:10px;padding-top:8px;<?= idx > 0 ? 'border-top:1px dashed #ddd;' : '' ?>">
+                ⏰ <?= h.inicio ?> - <?= h.fin ?>
+                <? if (h.descripcion) { ?>
+                  | 📝 <?= h.descripcion ?>
+                <? } ?>
+                <? if (h.auditores && h.auditores.length > 0) { ?>
+                  <br>👤 Auditores: <?= h.auditores.join(', ') ?>
+                <? } ?>
+                <? if (h.auditados && h.auditados.length > 0) { ?>
+                  <br>👥 Auditados: <?= h.auditados.join(', ') ?>
+                <? } ?>
+                <? if (h.procesos && h.procesos.length > 0) { ?>
+                  <div class="criterio-box">
+                    <strong>🧩 Procesos y Subprocesos a evaluar:</strong><br>
+                    <? h.procesos.forEach(function(p) { ?>
+                      • <strong><?= p.proceso ?></strong> <?= p.subprocesos.join(', ') ?><br>
+                    <? }); ?>
+                  </div>
+                <? } ?>
+                <? if (h.normas && h.normas.length > 0) { ?>
+                <div class="criterio-box">
+                    <strong>📋 Normas y Requisitos a verificar:</strong><br>
+                    <? h.normas.forEach(function(n) { ?>
+                      • <strong><?= n.norma ?></strong> <?= n.requisitos.join(', ') ?><br>
+                    <? }); ?>
+                  </div>
+                <? } ?>
+              </div>
+            <? }); ?>
+          </div>
+        <? }); ?>
+      <? } else { ?>
+        <div class="field">No se especificaron horarios</div>
+      <? } ?>
+      <? if (datos.observaciones) { ?>
+        <h3 class="section-title">🗒️ Observaciones</h3>
+        <div class="field"><?= datos.observaciones ?></div>
+      <? } ?>
+      <div class="importante">
+        <strong>⚠️ ¡MUY IMPORTANTE - ACCIÓN REQUERIDA!</strong><br><br>
+        <strong>1. RESERVA ESTOS HORARIOS</strong> en tu calendario personal de inmediato.<br>
+        <strong>2. PREPARA LA DOCUMENTACIÓN</strong> relacionada con los criterios mencionados arriba.<br>
+        <strong>3. CONFIRMA TU ASISTENCIA</strong> respondiendo a este correo o contactando al área de Calidad.<br>
+        <strong>4. ORGANIZA TU AGENDA</strong> para estar completamente disponible durante los horarios programados.<br><br>
+        Tu preparación y puntualidad son fundamentales para el éxito de esta auditoría. <strong>¡No olvides agendar!</strong>
+      </div>
+      <div class="checklist">
+        <strong style="color:#1976d2">✅ Checklist de preparación:</strong>
+        <ul style="margin:10px 0;padding-left:20px;font-size:13px">
+          <li>Revisar los procesos y subprocesos listados</li>
+          <li>Tener disponible la documentación de los requisitos mencionados</li>
+          <li>Preparar evidencias de cumplimiento (registros, formatos, reportes)</li>
+          <li>Informar a tu equipo sobre la auditoría</li>
+          <li>Disponer de un espacio adecuado para la auditoría (si es presencial)</li>
+          <li>Verificar acceso a plataforma (si es virtual)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer">
+      <p><strong>Sistema de Planeación de Auditorías</strong><br>Galletas Noel S.A.S 🍪</p>
+      <div class="logo">
+        <img src="https://i.imgur.com/SwwWUHO.png" alt="Logo Noel" style="height:80px;width:auto">
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#999">
+        Este es un mensaje automático del sistema. Por favor no responder a este correo.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
