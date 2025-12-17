@@ -51,7 +51,7 @@ function doGet(e) {
  * 🖥️ Abre la Web App desde un modal.
  */
 function abrirWebAuditoria() {
-  const url = "https://script.google.com/macros/s/AKfycbykb4n5qbL3lyi4QHus6pCrkKMInZoatJ6UteLI-jNRHBHPBAByd3JBHkMkmooVxUyA0g/exec";
+  const url = "https://script.google.com/macros/s/AKfycbxEIJl3XUdoSnD6OCGbVcm4rk20L7hZGFsnxqu78qUjwmDlP2gmit3209OSOxxVPp1ygA/exec";
   const html = HtmlService.createHtmlOutput(`
     <div style="font-family:sans-serif; text-align:center; padding:30px">
       <h2 style="color:#9e1a18;">🌐 Acceso al Planificador</h2>
@@ -108,3 +108,4 @@ function obtenerFechaBogota() {
   };
   return new Intl.DateTimeFormat('es-CO', opciones).format(ahora);
 }
+
