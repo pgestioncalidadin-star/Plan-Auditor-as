@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #f4f8fb;
+      margin: 0; padding: 20px; color: #333;
+    }
+    h2 { color: #003366; margin-bottom: 10px; }
+    .btn {
+      display: block; width: 100%;
+      background: #0059b3; color: white;
+      border: none; border-radius: 8px;
+      padding: 10px; margin: 5px 0;
+      cursor: pointer; text-align: left; font-size: 14px;
+    }
+    .btn:hover { background: #003d80; }
+    .nav-btn { margin-top: 10px; background: #999; }
+    .descripcion {
+      background: white; border-radius: 8px;
+      padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .cards-container { display: flex; gap: 16px; margin-bottom: 16px; }
+    .card {
+      flex: 1; border-radius: 12px;
+      background: linear-gradient(180deg,#e6f0ff,#cfe0ff);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: .2s;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06); padding: 18px;
+    }
+    .card.requisitos { background: linear-gradient(180deg,#eaf4ff,#d6eaff); }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 12px 26px rgba(0,0,0,0.12); }
+    .card-title { font-size: 26px; font-weight: 700; color: #003d99; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="inicioView">
+    <div class="cards-container">
+      <div class="card" onclick="irProcesos()">
+        <div class="card-title">🧩 Procesos</div>
+      </div>
+      <div class="card requisitos" onclick="irRequisitos()">
+        <div class="card-title">📋 Requisitos</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="visorView" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div id="breadcrumbArea" class="breadcrumb"></div>
+      <div>
+        <button class="btn nav-btn" onclick="mostrarInicio()">🏠 Inicio</button>
+        <button class="btn nav-btn" onclick="google.script.host.close()">❌ Cerrar</button>
+      </div>
+    </div>
+    <div id="lista"></div>
+  </div>
+
+  <script>
+   let datos = {}; // Vista Procesos
+   let datosReversa = {}; // Vista Requisitos (Inversa)
+   let procesoActual = "", subprocesoActual = "", responsableActual = "";
+   let normaActualR = "", requisitoActualR = "", procesoActualR = "";
+
+   function escapeHtml(t) {
+     if (!t) return "";
+     return t.replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+   }
+
+   function mostrarInicio() {
+     document.getElementById("inicioView").style.display = "";
+     document.getElementById("visorView").style.display = "none";
+     document.getElementById("lista").innerHTML = "";
+     document.getElementById("breadcrumbArea").innerHTML = "";
+     datos = {}; datosReversa = {};
+   }
+
+   /* ---------- Vista: PROCESOS ---------- */
+   function irProcesos() {
+     document.getElementById("inicioView").style.display = "none";
+     document.getElementById("visorView").style.display = "";
+     document.getElementById("breadcrumbArea").innerHTML = "<div class='crumb'>Procesos</div>";
+
+     google.script.run.withSuccessHandler(p => {
+       datos = p || {};
+       const claves = Object.keys(datos);
+       let html = "<h2>Procesos</h2>";
+       if (claves.length === 0) html += "<div>No se encontraron procesos.</div>";
+       else claves.sort().forEach(proc => {
+         html += `<button class="btn" onclick="mostrarSubprocesos('${escapeHtml(proc)}')">${escapeHtml(proc)}</button>`;
+       });
+       document.getElementById("lista").innerHTML = html;
+     }).obtenerDatos();
+   }
+
+   function mostrarSubprocesos(proc) {
+     procesoActual = proc;
+     const subs = datos[proc] || {};
+     let html = `<h2>${escapeHtml(proc)}</h2>`;
+     Object.keys(subs).sort().forEach(sub => {
+       html += `<button class="btn" onclick="mostrarResponsables('${escapeHtml(sub)}')">${escapeHtml(sub)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="irProcesos()">⬅️ Volver</button>`;
+     document.getElementById("breadcrumbArea").innerHTML = `<div class='crumb'>Procesos</div><div class='crumb'>${escapeHtml(proc)}</div>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarResponsables(sub) {
+     subprocesoActual = sub;
+     const responsables = datos[procesoActual][sub] || {};
+     let html = `<h2>${escapeHtml(procesoActual)}<br><small>${escapeHtml(sub)}</small></h2>`;
+     Object.keys(responsables).sort().forEach(resp => {
+       html += `<button class="btn" onclick="mostrarNormas('${escapeHtml(resp)}')">Responsable: ${escapeHtml(resp)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="mostrarSubprocesos('${escapeHtml(procesoActual)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarNormas(resp) {
+     responsableActual = resp;
+     const normasObj = datos[procesoActual][subprocesoActual][resp] || {};
+     let html = `<h2>${escapeHtml(subprocesoActual)}<br><small>Responsable: ${escapeHtml(resp)}</small></h2>`;
+     Object.keys(normasObj).sort().forEach(norma => {
+       html += `<button class="btn" onclick="mostrarRequisitos('${escapeHtml(norma)}')">${escapeHtml(norma)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="mostrarResponsables('${escapeHtml(subprocesoActual)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarRequisitos(norma) {
+     const reqs = datos[procesoActual][subprocesoActual][responsableActual][norma] || [];
+     let html = `<h2>${escapeHtml(norma)}</h2>`;
+     if (reqs.length === 0) html += "<div>No hay requisitos registrados.</div>";
+     else reqs.sort().forEach(r => {
+       html += `<button class="btn" onclick="mostrarDescripcion('${escapeHtml(norma)}','${escapeHtml(r)}')">${escapeHtml(r)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="mostrarNormas('${escapeHtml(responsableActual)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarDescripcion(norma, numero) {
+     google.script.run.withSuccessHandler(desc => {
+       let html = `<div class="descripcion">
+         <div class="titulo">${escapeHtml(desc?.titulo || norma)}</div>
+         <div class="subtitulo">${escapeHtml(desc?.subtitulo || numero)}</div>
+         <div class="texto">${escapeHtml(desc?.descripcion || '')}</div>
+       </div>
+       <button class="btn nav-btn" onclick="mostrarRequisitos('${escapeHtml(norma)}')">⬅️ Volver</button>`;
+       document.getElementById("lista").innerHTML = html;
+     }).obtenerDescripcion(norma, numero);
+   }
+
+   /* ---------- Vista: REQUISITOS (INVERSA) ---------- */
+   function irRequisitos() {
+     document.getElementById("inicioView").style.display = "none";
+     document.getElementById("visorView").style.display = "";
+     document.getElementById("breadcrumbArea").innerHTML = "<div class='crumb'>Requisitos</div>";
+
+     google.script.run.withSuccessHandler(data => {
+       datosReversa = data || {};
+       const normas = Object.keys(datosReversa);
+       let html = "<h2>Normas</h2>";
+       if (normas.length === 0) html += "<div>No se encontraron normas.</div>";
+       else normas.sort().forEach(norma => {
+         html += `<button class="btn" onclick="mostrarRequisitosPorNorma('${escapeHtml(norma)}')">${escapeHtml(norma)}</button>`;
+       });
+       html += `<button class="btn nav-btn" onclick="mostrarInicio()">⬅️ Volver</button>`;
+       document.getElementById("lista").innerHTML = html;
+     }).obtenerDatosReversa();
+   }
+
+   function mostrarRequisitosPorNorma(norma) {
+     normaActualR = norma;
+     const requisitos = Object.keys(datosReversa[norma] || {});
+     let html = `<h2>${escapeHtml(norma)}</h2>`;
+     if (requisitos.length === 0) html += "<div>No se encontraron requisitos.</div>";
+     else requisitos.sort().forEach(req => {
+       html += `<button class="btn" onclick="mostrarProcesosPorRequisito('${escapeHtml(req)}')">${escapeHtml(req)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="irRequisitos()">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarProcesosPorRequisito(req) {
+     requisitoActualR = req;
+     const procesos = Object.keys(datosReversa[normaActualR][req] || {});
+     let html = `<h2>${escapeHtml(requisitoActualR)} <br><small>(${escapeHtml(normaActualR)})</small></h2>`;
+     if (procesos.length === 0) html += "<div>No se encontraron procesos.</div>";
+     else procesos.sort().forEach(proc => {
+       html += `<button class="btn" onclick="mostrarSubprocesosPorProceso('${escapeHtml(proc)}')">${escapeHtml(proc)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="mostrarRequisitosPorNorma('${escapeHtml(normaActualR)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarSubprocesosPorProceso(proc) {
+     procesoActualR = proc;
+     const subprocesos = Object.keys(datosReversa[normaActualR][requisitoActualR][proc] || {});
+     let html = `<h2>${escapeHtml(procesoActualR)} <br><small>(${escapeHtml(requisitoActualR)})</small></h2>`;
+     if (subprocesos.length === 0) html += "<div>No se encontraron subprocesos.</div>";
+     else subprocesos.sort().forEach(sub => {
+       html += `<button class="btn" onclick="mostrarResponsablesPorSubproceso('${escapeHtml(sub)}')">${escapeHtml(sub)}</button>`;
+     });
+     html += `<button class="btn nav-btn" onclick="mostrarProcesosPorRequisito('${escapeHtml(requisitoActualR)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+
+   function mostrarResponsablesPorSubproceso(sub) {
+     const responsables = datosReversa[normaActualR][requisitoActualR][procesoActualR][sub] || [];
+     let html = `<h2>${escapeHtml(sub)} <br><small>(${escapeHtml(procesoActualR)})</small></h2>`;
+     html += `<div class="descripcion" style="margin-bottom:15px;">
+                <strong>Norma:</strong> ${escapeHtml(normaActualR)}<br>
+                <strong>Requisito:</strong> ${escapeHtml(requisitoActualR)}
+              </div>
+              <h3>Responsables:</h3>`;
+     if (responsables.length === 0) html += "<div>No se encontraron responsables.</div>";
+     else {
+       html += `<ul style='list-style:none; padding-left:0;'>`;
+       responsables.sort().forEach(resp => {
+         html += `<li style='background:#fff; padding:8px; border-radius:4px; margin-bottom:5px;'>${escapeHtml(resp)}</li>`;
+       });
+       html += `</ul>`;
+     }
+     html += `<button class="btn nav-btn" onclick="mostrarSubprocesosPorProceso('${escapeHtml(procesoActualR)}')">⬅️ Volver</button>`;
+     document.getElementById("lista").innerHTML = html;
+   }
+</script>
+</body>
+</html>
