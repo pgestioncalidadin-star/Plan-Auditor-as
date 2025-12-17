@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body{font-family:Arial,sans-serif;background-color:#f5f5f5;padding:20px;margin:0}
+    .container{max-width:650px;margin:0 auto;background-color:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+    .header{background:linear-gradient(90deg,#9e1a18,#e62330);color:white;padding:25px;text-align:center}
+    .header h1{margin:0;font-size:24px}
+    .content{padding:30px;color:#333}
+    .field{margin-bottom:15px;line-height:1.6}
+    .horario-block{background:#f9f9f9;padding:12px;border-radius:6px;margin-bottom:10px;border-left:4px solid #e62330}
+    .criterio-box{background:#fff3e0;padding:10px;border-radius:6px;margin-top:8px;margin-left:15px;font-size:13px;border:1px solid #ffb74d}
+    .footer{background-color:#f0f0f0;padding:20px;text-align:center;font-size:13px;color:#666}
+    .logo{margin-top:15px}
+    .importante{background:#ffe5e5;border-left:4px solid #e62330;padding:15px;margin:20px 0;border-radius:6px;font-size:14px}
+    .highlight-box{background:#e8f5e9;border:2px solid #4caf50;padding:15px;border-radius:8px;margin:15px 0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>📋 Notificación de Auditoría</h1></div>
+    <div class="content">
+      <p>Cordial saludo,</p>
+      <p>Se le ha programado una auditoría. Detalles:</p>
+      
+      <div class="highlight-box">
+        <strong style="color:#2e7d32">📌 Oportunidad para:</strong>
+        <ul style="margin:10px 0;padding-left:20px">
+          <li>Demostrar cumplimiento</li>
+          <li>Identificar mejoras</li>
+          <li>Fortalecer y mejorar nustros procesos</li>
+        </ul>
+      </div>
+
+      <div class="field"><strong>🆔 ID:</strong> <?= idAuditoria ?></div>
+      <div class="field"><strong>📋 Nombre:</strong> <?= datos.nombre || '' ?></div>
+      
+      <h3 style="color:#9e1a18;border-bottom:2px solid #e62330">🎯 Objetivos</h3>
+      <ul style="margin:5px 0;padding-left:20px">
+        <? if (datos.objetivos && datos.objetivos.length > 0) { ?>
+          <? datos.objetivos.forEach(function(obj) { ?> <li><?= obj ?></li> <? }); ?>
+        <? } else { ?> No especificado <? } ?>
+      </ul>
+      
+      <h3 style="color:#9e1a18;border-bottom:2px solid #e62330">📏 Alcance</h3>
+      <div class="field"><?= datos.alcance || 'No especificado' ?></div>
+      
+      <h3 style="color:#9e1a18;border-bottom:2px solid #e62330">🧭 Detalles</h3>
+      <div class="field"><strong>Modalidad:</strong> <?= datos.modalidad ?> | <strong>Tipo:</strong> <?= datos.tipo ?></div>
+      
+      <h3 style="color:#9e1a18;border-bottom:2px solid #e62330">📅 Horarios y Criterios</h3>
+      <? if (datos.horariosAgrupados && datos.horariosAgrupados.length > 0) { ?>
+        <? datos.horariosAgrupados.forEach(function(dia) { ?>
+          <div class="horario-block">
+            <strong style="color:#9e1a18">Día <?= dia.numeroDia ?> - <?= dia.fecha ?></strong>
+            <? dia.horarios.forEach(function(h, idx) { ?>
+              <div style="margin-top:10px;padding-top:8px;border-top:1px dashed #ddd">
+                ⏰ <?= h.inicio ?> - <?= h.fin ?>
+                <? if (h.descripcion) { ?> | 📝 <?= h.descripcion ?> <? } ?>
+                
+                <? if (h.auditores && h.auditores.length) { ?><br>👤 <strong>Auditores:</strong> <?= h.auditores.map(function(a){return a.nombre||a}).join(', ') ?><? } ?>
+                <? if (h.auditados && h.auditados.length) { ?><br>👥 <strong>Auditados:</strong> <?= h.auditados.map(function(a){return a.nombre||a}).join(', ') ?><? } ?>
+                
+                <? if (h.procesos && h.procesos.length) { ?>
+                  <div class="criterio-box">
+                    <strong>🧩 Procesos seleccionados:</strong><br>
+                    <? h.procesos.forEach(function(p) { ?>
+                      <div style="margin-top:5px"><strong><?= p.proceso ?>:</strong></div>
+                      <? p.subprocesos.forEach(function(sub) { ?>
+                         <div style="margin-left:10px">• <?= sub ?></div>
+                      <? }); ?>
+                    <? }); ?>
+                  </div>
+                <? } ?>
+                
+                <? if (h.normas && h.normas.length) { ?>
+                  <div class="criterio-box">
+                    <strong>📋 Normas seleccionadas:</strong><br>
+                    <? h.normas.forEach(function(n) { ?>
+                      <div style="margin-top:5px"><strong><?= n.norma ?>:</strong></div>
+                      <? n.requisitos.forEach(function(req) { ?>
+                         <div style="margin-left:10px">• <?= req ?></div>
+                      <? }); ?>
+                    <? }); ?>
+                  </div>
+                <? } ?>
+              </div>
+            <? }); ?>
+          </div>
+        <? }); ?>
+      <? } ?>
+      
+      <div class="importante">
+        <strong>⚠️ ¡MUY IMPORTANTE!</strong><br><br>
+        Acepta estos horarios, prepara la documentación y confirma tu asistencia.
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p><strong>Sistema de Planeación de Auditorías</strong><br>Compañía de Galletas Noel S.A.S 🍪</p>
+      <div class="logo">
+        <img src="https://i.imgur.com/SwwWUHO.png" alt="Logo Noel" style="height:100px;width:auto">
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#999">
+        Este es un mensaje automático del sistema. Por favor no responder a este correo.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
